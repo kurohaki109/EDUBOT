@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBot</title>
+    
+    
+    <script>
+        if (!localStorage.getItem("username")) {
+            window.location.href = "/"; 
+        }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
+            color: white;
+        }
+
+        .header h1 { font-size: 22px; font-weight: 700; }
+        .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .selection-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 30px;
+        }
+
+        .selection-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        .selection-subtitle {
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            margin-top: -20px;
+        }
+
+        .cards-grid {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e8e8e8;
+            border-radius: 16px;
+            padding: 24px 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102,126,234,0.2);
+        }
+
+        .card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+        }
+
+        .card-icon { font-size: 36px; margin-bottom: 10px; }
+        .card-title { font-size: 15px; font-weight: 600; color: #333; }
+        .card-subtitle { font-size: 12px; color: #888; margin-top: 4px; }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+        }
+
+        .btn-next.visible { display: block; }
+
+        .chat-screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+
+        .chat-info {
+            background: #f8f9ff;
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-info-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-back {
+            margin-left: auto;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover { background: #f0f0f0; }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 400px;
+            max-height: 450px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user { flex-direction: row-reverse; }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .avatar.bot { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .avatar.user { background: #f0f0f0; }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .bubble.bot {
+            background: #f8f9ff;
+            border: 1px solid #e8e8f0;
+            color: #333;
+            border-top-left-radius: 4px;
+        }
+
+        .bubble.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .bubble.blocked {
+            background: #fff3f3;
+            border-color: #ffcdd2;
+            color: #c62828;
+        }
+
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 8px 4px;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .chat-input-area {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background: white;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .chat-input:focus { border-color: #667eea; }
+
+        .btn-send {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .btn-send:hover { transform: scale(1.05); }
+        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .step.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .step.done { background: #4caf50; color: white; }
+        .step.inactive { background: #e0e0e0; color: #999; }
+        .step-line { width: 30px; height: 2px; background: #e0e0e0; }
+        .step-line.done { background: #4caf50; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎓 EduBot</h1>
+        <p>Asisten belajar berbasis buku pelajaran SD</p>
+        <div class="badge"> Powered by Mistral NeMo + NeMo Guardrails</div>
+    </div>
+
+    <div class="selection-screen" id="step1">
+        <div class="step-indicator">
+            <div class="step active" id="s1">1</div>
+            <div class="step-line" id="l1"></div>
+            <div class="step inactive" id="s2">2</div>
+        </div>
+        <div class="selection-title">Pilih Kelas</div>
+        <div class="selection-subtitle">Pilih kelas yang ingin kamu pelajari</div>
+        <div class="cards-grid" id="kelas-cards">
+            <div class="card" onclick="pilihKelas('Kelas 4')">
+                <div class="card-icon">📚</div>
+                <div class="card-title">Kelas 4</div>
+                <div class="card-subtitle">SD Semester 1 & 2</div>
+            </div>
+            <div class="card" onclick="pilihKelas('Kelas 5')">
+                <div class="card-icon">📖</div>
+                <div class="card-title">Kelas 5</div>
+                <div class="card-subtitle">SD Semester 1 & 2</div>
+            </div>
+            <div class="card" onclick="pilihKelas('Kelas 6')">
+                <div class="card-icon">🎒</div>
+                <div class="card-title">Kelas 6</div>
+                <div class="card-subtitle">SD Semester 1 & 2</div>
+            </div>
+        </div>
+        <button class="btn-next" id="btn-next-1" onclick="keStep2()">Lanjut →</button>
+    </div>
+
+    <div class="selection-screen" id="step2" style="display:none;">
+        <div class="step-indicator">
+            <div class="step done" id="s1b">✓</div>
+            <div class="step-line done"></div>
+            <div class="step active" id="s2b">2</div>
+        </div>
+        <div class="selection-title">Pilih Mata Pelajaran</div>
+        <div class="selection-subtitle" id="subtitle-step2">Pilih mapel untuk kelas yang dipilih</div>
+        <div class="cards-grid" id="mapel-cards">
+            <div class="card" onclick="pilihMapel('IPAS')">
+                <div class="card-icon">🔬</div>
+                <div class="card-title">IPAS</div>
+                <div class="card-subtitle">Ilmu Pengetahuan Alam & Sosial</div>
+            </div>
+            <div class="card" onclick="pilihMapel('PJOK')">
+                <div class="card-icon">⚽</div>
+                <div class="card-title">PJOK</div>
+                <div class="card-subtitle">Pendidikan Jasmani & Olahraga</div>
+            </div>
+            <div class="card" onclick="pilihMapel('Pendidikan Pancasila')">
+                <div class="card-icon">🦅</div>
+                <div class="card-title">Pendidikan Pancasila</div>
+                <div class="card-subtitle">PKn & Nilai Pancasila</div>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-next visible" onclick="keStep1()" style="background: #f0f0f0; color: #333;">← Kembali</button>
+            <button class="btn-next" id="btn-next-2" onclick="mulaiChat()">Mulai Belajar →</button>
+        </div>
+    </div>
+
+    <div class="chat-screen" id="chat-screen">
+        <div class="chat-info">
+            <span id="chat-badge-kelas" class="chat-info-badge"></span>
+            <span id="chat-badge-mapel" class="chat-info-badge"></span>
+            <button class="btn-back" onclick="keStep1()">← Ganti</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message">
+                <div class="avatar bot">🎓</div>
+                <div class="bubble bot" id="welcome-msg"></div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input
+                class="chat-input"
+                id="chat-input"
+                type="text"
+                placeholder="Tanya materi pelajaran..."
+                onkeydown="if(event.key==='Enter') kirim()"
+            />
+            <button class="btn-send" id="btn-send" onclick="kirim()">➤</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedKelas = null;
+    let selectedMapel = null;
+
+    function pilihKelas(kelas) {
+        selectedKelas = kelas;
+        document.querySelectorAll('#kelas-cards .card').forEach(c => c.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        document.getElementById('btn-next-1').classList.add('visible');
+    }
+
+    function pilihMapel(mapel) {
+        selectedMapel = mapel;
+        document.querySelectorAll('#mapel-cards .card').forEach(c => c.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        document.getElementById('btn-next-2').classList.add('visible');
+    }
+
+    function keStep1() {
+        selectedMapel = null;
+        document.getElementById('step1').style.display = 'flex';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('chat-screen').style.display = 'none';
+        document.querySelectorAll('#mapel-cards .card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('btn-next-2').classList.remove('visible');
+    }
+
+    function keStep2() {
+        if (!selectedKelas) return;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'flex';
+        document.getElementById('subtitle-step2').textContent =
+            `Pilih mapel untuk ${selectedKelas}`;
+    }
+
+    function mulaiChat() {
+        if (!selectedMapel) return;
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('chat-screen').style.display = 'flex';
+        document.getElementById('chat-badge-kelas').textContent = selectedKelas;
+        document.getElementById('chat-badge-mapel').textContent = selectedMapel;
+        document.getElementById('welcome-msg').textContent =
+            `Halo! Aku siap membantu kamu belajar ${selectedMapel} ${selectedKelas}. Silakan tanya apa saja tentang materi pelajaran! 😊`;
+
+    
+        const messages = document.getElementById('chat-messages');
+        const welcome = messages.querySelector('.message');
+        messages.innerHTML = '';
+        messages.appendChild(welcome);
+        document.getElementById('chat-input').focus();
+    }
+
+    function tambahPesan(teks, tipe) {
+        const messages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `message ${tipe === 'user' ? 'user' : ''}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = `avatar ${tipe === 'user' ? 'user' : 'bot'}`;
+        avatar.textContent = tipe === 'user' ? '👤' : '🎓';
+
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${tipe}`;
+        bubble.textContent = teks;
+
+        div.appendChild(avatar);
+        div.appendChild(bubble);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return div;
+    }
+
+    function tambahTyping() {
+        const messages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.id = 'typing-indicator';
+        div.innerHTML = `
+            <div class="avatar bot">🎓</div>
+            <div class="bubble bot">
+                <div class="typing">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function hapusTyping() {
+        const t = document.getElementById('typing-indicator');
+        if (t) t.remove();
+    }
+
+    async function kirim() {
+        const input = document.getElementById('chat-input');
+        const btn = document.getElementById('btn-send');
+        const teks = input.value.trim();
+        if (!teks) return;
+
+        input.value = '';
+        btn.disabled = true;
+        tambahPesan(teks, 'user');
+        tambahTyping();
+
+        try {
+            const res = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    message: teks,
+                    kelas: selectedKelas,
+                    mapel: selectedMapel
+                })
+            });
+            const data = await res.json();
+            hapusTyping();
+
+            const div = tambahPesan(data.reply, 'bot');
+            if (data.blocked) {
+                div.querySelector('.bubble').classList.add('blocked');
+            }
+        } catch (e) {
+            hapusTyping();
+            tambahPesan('Maaf, terjadi kesalahan. Coba lagi.', 'bot');
+        }
+
+        btn.disabled = false;
+        input.focus();
+    }
+</script>
+</body>
+</html>

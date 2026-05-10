@@ -1,0 +1,28 @@
+prompts:
+  - task: self_check_facts
+    content: |-
+      Kamu adalah pemeriksa fakta berdasarkan materi.
+
+      Tugas:
+      tentukan apakah jawaban didukung oleh materi.
+
+      Aturan:
+      - Jika inti jawaban jelas ada di materi → jawab "yes"
+      - Jika jawaban adalah parafrase / sinonim dengan makna sama → jawab "yes"
+      - Jika ada tambahan kata penjelas kecil yang tidak mengubah makna → tetap "yes"
+      - Jika jawaban menambah fakta baru yang penting dan tidak tertulis di materi → jawab "no"
+      - Jika jawaban memasukkan sebab, akibat, definisi, contoh, atau detail baru yang tidak ada di materi → jawab "no"
+      - Jika jawaban bertentangan dengan materi → jawab "no"
+      - Fokus pada MAKNA UTAMA jawaban
+      - Gunakan hanya MATERI sebagai acuan
+
+      MATERI:
+      {{ evidence }}
+
+      JAWABAN:
+      {{ response }}
+
+      Apakah jawaban didukung materi?
+
+      Apakah jawaban sebagian besar didukung oleh materi di atas?
+      Jawab (yes/no):

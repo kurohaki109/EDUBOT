@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Chatbot SD</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Segoe UI,sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+        }
+
+        .box{
+            width:100%;
+            max-width:420px;
+            background:white;
+            border-radius:20px;
+            padding:40px;
+            box-shadow:0 20px 60px rgba(0,0,0,.25);
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:8px;
+            color:#333;
+        }
+
+        p{
+            text-align:center;
+            color:#777;
+            margin-bottom:30px;
+        }
+
+        input{
+            width:100%;
+            padding:14px;
+            margin-bottom:15px;
+            border:2px solid #ddd;
+            border-radius:12px;
+            outline:none;
+            font-size:14px;
+        }
+
+        input:focus{
+            border-color:#667eea;
+        }
+
+        button{
+            width:100%;
+            padding:14px;
+            border:none;
+            border-radius:12px;
+            font-size:15px;
+            cursor:pointer;
+            font-weight:700;
+        }
+
+        .login-btn{
+            color:white;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            margin-bottom:12px;
+        }
+
+        .register-btn{
+            background:#f2f2f2;
+            color:#333;
+        }
+
+        .msg{
+            margin-top:15px;
+            text-align:center;
+            color:red;
+            font-size:14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>Login</h1>
+    <p>Masuk ke Chatbot Belajar SD</p>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+
+    <button class="login-btn" onclick="login()">Masuk</button>
+
+    <button
+        class="register-btn"
+        onclick="window.location.href='/register-page'">
+        Daftar Akun Baru
+    </button>
+
+    <div class="msg" id="msg"></div>
+</div>
+
+<script>
+async function login(){
+    const username=document.getElementById("username").value.trim();
+    const password=document.getElementById("password").value.trim();
+    const msg=document.getElementById("msg");
+
+    msg.innerHTML="";
+
+    try{
+        const res=await fetch("/login",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        const data=await res.json();
+
+        if(!res.ok){
+            msg.innerHTML=data.detail;
+            return;
+        }
+
+        localStorage.setItem("username",data.username);
+
+        window.location.href="/chatbot";
+
+    }catch(err){
+        msg.innerHTML="Server error";
+    }
+}
+</script>
+
+</body>
+</html>

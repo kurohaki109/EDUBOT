@@ -1,0 +1,20 @@
+from langchain_chroma import Chroma
+from langchain_ollama import OllamaEmbeddings
+
+db = Chroma(persist_directory="chroma_db", 
+            embedding_function=OllamaEmbeddings(model="nomic-embed-text"))
+
+results = db._collection.get()
+metadatas = results["metadatas"]
+
+# Lihat semua unique value dari field kelas dan mapel
+kelas_set = set(m.get("kelas", "TIDAK ADA") for m in metadatas)
+mapel_set = set(m.get("mapel", "TIDAK ADA") for m in metadatas)
+
+print("=== UNIQUE KELAS ===")
+for k in sorted(kelas_set):
+    print(f"  '{k}'")
+
+print("\n=== UNIQUE MAPEL ===")
+for m in sorted(mapel_set):
+    print(f"  '{m}'")

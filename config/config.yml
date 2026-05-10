@@ -1,0 +1,24 @@
+colang_version: "1.0"
+
+models:
+  - type: main
+    engine: openai
+    model: mistral-nemo
+    parameters:
+      base_url: "http://localhost:11434/v1"
+      api_key: "ollama"
+
+  - type: embeddings
+    engine: nomic_v2_ollama
+    model: nomic-embed-text-v2-moe
+
+rails:
+  dialog:
+    user_messages:
+      embeddings_only: true
+      embeddings_only_similarity_threshold: 0.45
+      embeddings_only_fallback_intent: "ask education"
+
+  output:
+    flows:
+      - self check facts

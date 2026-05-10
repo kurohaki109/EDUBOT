@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Register</title>
+<style>
+body{
+font-family:Segoe UI;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:linear-gradient(135deg,#667eea,#764ba2);
+}
+.box{
+background:white;
+padding:40px;
+border-radius:20px;
+width:350px;
+}
+input,button{
+width:100%;
+padding:12px;
+margin-top:12px;
+border-radius:10px;
+border:1px solid #ddd;
+}
+button{
+background:#667eea;
+color:white;
+border:none;
+cursor:pointer;
+}
+a{text-decoration:none;color:#667eea;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Daftar Akun</h2>
+
+<input id="u" placeholder="Username">
+<input id="p" type="password" placeholder="Password (min 6)">
+
+<button onclick="reg()">Daftar</button>
+
+<p>Sudah punya akun?
+<a href="/">Login</a></p>
+</div>
+
+<script>
+async function reg(){
+    const u = document.getElementById("u");
+    const p = document.getElementById("p");
+
+    const res=await fetch("/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+    username:u.value,
+    password:p.value
+    })
+    });
+
+    const data=await res.json();
+
+    if(data.success){
+    alert("Daftar berhasil");
+    location="/";
+    }else{
+    alert(data.detail);
+    }
+}
+</script>
+
+</body>
+</html>
